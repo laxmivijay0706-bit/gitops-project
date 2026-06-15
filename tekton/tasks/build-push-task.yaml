@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: build-push-task
+spec:
+  params:
+  - name: app-name
+    type: string
+  - name: image-tag
+    type: string
+    default: "latest"
+  - name: registry
+    type: string
+    default: "localhost:5000"
+  workspaces:
+  - name: source
+  steps:
+  - name: build-and-push
+    image: gcr.io/kaniko-project/executor:latest
+    args:
+    - "--context=$(workspaces.source.path)/source/apps/$(params.app-name)"
+    - "--destination=$(params.registry)/$(params.app-name):$(params.image-tag)"
+    - "--insecure"
+    - "--skip-tls-verify"
+    - "--log-format=text"
+    - "--verbosity=info"

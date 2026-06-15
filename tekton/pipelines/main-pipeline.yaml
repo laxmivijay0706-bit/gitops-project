@@ -1,0 +1,67 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: ci-pipeline
+spec:
+  params:
+  - name: git-url
+    type: string
+  - name: git-revision
+    type: string
+    default: "main"
+  - name: image-tag
+    type: string
+    default: "latest"
+  workspaces:
+  - name: shared-workspace
+  tasks:
+  - name: clone-repo
+    taskRef:
+      name: git-clone-task
+    params:
+    - name: git-url
+      value: $(params.git-url)
+    - name: git-revision
+      value: $(params.git-revision)
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+
+  - name: build-python
+    taskRef:
+      name: build-push-task
+    runAfter: [clone-repo]
+    params:
+    - name: app-name
+      value: python-backend
+    - name: image-tag
+      value: $(params.image-tag)
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+
+  - name: build-java
+    taskRef:
+      name: build-push-task
+    runAfter: [clone-repo]
+    params:
+    - name: app-name
+      value: java-backend
+    - name: image-tag
+      value: $(params.image-tag)
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+
+  - name: build-angular
+    taskRef:
+      name: build-push-task
+    runAfter: [clone-repo]
+    params:
+    - name: app-name
+      value: angular-frontend
+    - name: image-tag
+      value: $(params.image-tag)
+    workspaces:
+    - name: source
+      workspace: shared-workspace
