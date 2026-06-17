@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: npm-build-task
+spec:
+  workspaces:
+  - name: source
+  steps:
+  - name: npm-build
+    image: node:20-alpine
+    script: |
+      #!/bin/sh
+      set -e
+      echo "=== NPM Build Shuru ==="
+      cd $(workspaces.source.path)/source/apps/angular-frontend
+      npm install
+      npm run build
+      echo "=== NPM Build Complete — dist folder bana ==="

@@ -1,0 +1,2 @@
+pipelinerun.yaml
+tekton/pipelines/*-pipelinerun.yaml

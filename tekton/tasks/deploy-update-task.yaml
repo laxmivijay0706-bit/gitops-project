@@ -1,0 +1,42 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: deploy-update-task
+spec:
+  params:
+  - name: git-url
+    type: string
+  - name: app-name
+    type: string
+  - name: image-tag
+    type: string
+    default: "latest"
+  workspaces:
+  - name: source
+  steps:
+  - name: clone-for-deploy
+    image: alpine/git:latest
+    script: |
+      #!/bin/sh
+      echo "=== Repository clone kar rahe hain deploy ke liye ==="
+      rm -rf $(workspaces.source.path)/deploy-repo
+      git clone $(params.git-url) $(workspaces.source.path)/deploy-repo
+      echo "=== Clone complete ==="
+  - name: update-and-deploy
+    image: alpine/git:latest
+    script: |
+      #!/bin/sh
+      set -e
+      cd $(workspaces.source.path)/deploy-repo
+      echo "=== Manifest update kar rahe hain ==="
+      NEW_TAG="$(params.image-tag)"
+      sed -i "s|image: localhost:5000/$(params.app-name):.*|image: localhost:5000/$(params.app-name):${NEW_TAG}|g" \
+        k8s/base/$(params.app-name).yaml
+      echo "Updated manifest:"
+      grep "image:" k8s/base/$(params.app-name).yaml
+      git config user.email "tekton-ci@pipeline.local"
+      git config user.name "Tekton CI"
+      git add k8s/base/$(params.app-name).yaml
+      git commit -m "Deploy update: $(params.app-name) -> ${NEW_TAG}" || echo "No changes to commit"
+      git push origin main
+      echo "=== ArgoCD ab automatically deploy karega ==="

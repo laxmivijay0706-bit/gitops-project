@@ -1,0 +1,68 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: java-ci-pipeline
+spec:
+  params:
+  - name: git-url
+    type: string
+  - name: git-revision
+    type: string
+    default: "main"
+  - name: image-tag
+    type: string
+    default: "latest"
+  workspaces:
+  - name: shared-workspace
+  tasks:
+  # Step 1: Git Clone
+  - name: git-clone
+    taskRef:
+      name: git-clone-task
+    params:
+    - name: git-url
+      value: $(params.git-url)
+    - name: git-revision
+      value: $(params.git-revision)
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+
+  # Step 2: Maven Build (extra step)
+  - name: maven-build
+    taskRef:
+      name: maven-build-task
+    runAfter: [git-clone]
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+
+  # Step 3-4: Docker Build + Registry Push
+  - name: build-and-push
+    taskRef:
+      name: build-push-task
+    runAfter: [maven-build]
+    params:
+    - name: app-name
+      value: java-backend
+    - name: image-tag
+      value: $(params.image-tag)
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+
+  # Step 5-6: Repo Clone Again + GitOps Update
+  - name: deploy-update
+    taskRef:
+      name: deploy-update-task
+    runAfter: [build-and-push]
+    params:
+    - name: git-url
+      value: $(params.git-url)
+    - name: app-name
+      value: java-backend
+    - name: image-tag
+      value: $(params.image-tag)
+    workspaces:
+    - name: source
+      workspace: shared-workspace

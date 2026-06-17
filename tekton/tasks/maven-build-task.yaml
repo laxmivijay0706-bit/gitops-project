@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: maven-build-task
+spec:
+  workspaces:
+  - name: source
+  steps:
+  - name: maven-build
+    image: maven:3.9-eclipse-temurin-17
+    script: |
+      #!/bin/sh
+      set -e
+      echo "=== Maven Build Shuru ==="
+      cd $(workspaces.source.path)/source/apps/java-backend
+      mvn clean package -DskipTests
+      echo "=== Maven Build Complete — JAR file ban gaya ==="
+      ls target/*.jar
+    workingDir: $(workspaces.source.path)

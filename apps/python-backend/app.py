@@ -17,7 +17,7 @@ def health():
 @app.route('/api/data')
 def get_data():
     logger.info("Data endpoint called")
-    return jsonify({"message": "Hello from Python Backend!", "version": "1.0"})
+    return jsonify({"message": "LIVE DEMO for Sir - Pipeline Working!", "version": "1.0"})
 
 if __name__ == '__main__':
     logger.info("Python backend starting on port 5000")
