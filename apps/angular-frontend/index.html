@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GitOps Demo App</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; background: #f0f2f5; }
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1 { color: #1976d2; }
+    .status { padding: 8px 16px; border-radius: 4px; display: inline-block; }
+    .ok { background: #e8f5e9; color: #2e7d32; }
+    button { background: #1976d2; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+    pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>GitOps Demo - Angular Frontend</h1>
+    <p>Deployed via <strong>ArgoCD</strong> + <strong>Tekton CI/CD</strong> on Minikube</p>
+    <span class="status ok">Running</span>
+  </div>
+  <div class="card">
+    <h2>Python Backend</h2>
+    <button onclick="callPython()">Call Python API</button>
+    <pre id="python-result">Click button to test...</pre>
+  </div>
+  <div class="card">
+    <h2>Java Backend</h2>
+    <button onclick="callJava()">Call Java API</button>
+    <pre id="java-result">Click button to test...</pre>
+  </div>
+  <script>
+    async function callPython() {
+      try {
+        const r = await fetch('/api/python/data');
+        const d = await r.json();
+        document.getElementById('python-result').textContent = JSON.stringify(d, null, 2);
+      } catch(e) {
+        document.getElementById('python-result').textContent = 'Error: ' + e.message;
+      }
+    }
+    async function callJava() {
+      try {
+        const r = await fetch('/api/java/data');
+        const d = await r.json();
+        document.getElementById('java-result').textContent = JSON.stringify(d, null, 2);
+      } catch(e) {
+        document.getElementById('java-result').textContent = 'Error: ' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
