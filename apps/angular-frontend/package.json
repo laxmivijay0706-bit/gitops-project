@@ -1,0 +1,7 @@
+{
+  "name": "angular-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'Building...' && mkdir -p dist/angular-frontend/browser && cp index.html dist/angular-frontend/browser/"
+  }
+}
